@@ -1,0 +1,35 @@
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+//        maven {
+//        //    url "https://raw.githubusercontent.com/ziylanmedya/ZMCameraKit-Android/main/"
+//
+//            //  url "${rootDir}/local-maven-repo"
+//        }  // Add this line to ensure local repo is included
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+//            url "https://raw.githubusercontent.com/ziylanmedya/ZMCameraKit-Android/main/"
+
+            url "${rootDir}/local-maven-repo"
+        }  // Add this line to ensure local repo is included
+    }
+}
+
+rootProject.name = "SnapApp"
+include ':app'
+include ':zmckit'

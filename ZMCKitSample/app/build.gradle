@@ -1,0 +1,59 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
+}
+
+android {
+    namespace 'com.ziylanmedya.camera'
+    compileSdk 34
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    defaultConfig {
+        applicationId "com.ziylanmedya.camera"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.1"
+
+        multiDexEnabled true
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        def cameraKitLensesId = "29476fd5-6eef-4aac-a3f0-224aff824194"
+        def cameraKitLensesGroupId = "5492a049-1f90-46cb-bbdb-082092ec55e9"
+        def cameraKitApiToken = "eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzMxOTMxMTYxLCJzdWIiOiJiY2JjYWZiYi1jMzQzLTQwZjYtYTEzMS0zMTQyNDg5MzRmMjB-U1RBR0lOR35hZjliZGRjOC04Y2IwLTRkMzQtOTZlZS1jNWNjYWQ0NGNlMzcifQ.ZNRJ5hmUI6titUTZLEi_A9jd8tKwyDQoBqG-w0ef3AU"
+        buildConfigField 'String', "LENS_ID", "\"${cameraKitLensesId}\""
+        buildConfigField 'String', "LENS_GROUP_ID", "\"${cameraKitLensesGroupId}\""
+        buildConfigField 'String', "CAMERA_KIT_API_TOKEN", "\"$cameraKitApiToken\""
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+
+    // Add library dependency
+    implementation 'com.ziylanmedya:zmckit:1.0.1'
+
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+}

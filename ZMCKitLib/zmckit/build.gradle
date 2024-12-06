@@ -1,0 +1,96 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    id 'maven-publish'  // Add this plugin for publishing to Maven
+}
+
+android {
+    namespace 'com.ziylanmedya.zmckit'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+
+    def cameraKitVersion = '1.34.0'
+    implementation"com.ziylanmedya.zmckit:support-camera-activity:$cameraKitVersion"
+
+//    implementation 'com.ziylanmedya.zmckit:camerakit:1.34.0'
+//    implementation 'com.ziylanmedya.zmckit:camerakit-api:1.34.0'
+//    implementation 'com.ziylanmedya.zmckit:camerakit-kotlin:1.34.0'
+//    implementation 'com.ziylanmedya.zmckit:support-camera-common:1.34.0'
+//    implementation 'com.ziylanmedya.zmckit:support-camerax:1.34.0'
+//    implementation 'com.ziylanmedya.zmckit:support-media-recording:1.27.0'
+//    implementation 'com.ziylanmedya.zmckit:support-permissions:1.34.0'
+//    implementation 'com.ziylanmedya.zmckit:support-snap-attribution:1.34.0'
+}
+
+// Task to generate the sources JAR
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+// Configure Maven publishing
+project.afterEvaluate {
+    publishing {
+        publications {
+            // Define a publication of type MavenPublication
+            release(MavenPublication) {
+                groupId = "com.ziylanmedya" // Your package name
+                artifactId = "zmckit" // Library name
+                version = "1.0.1" // Version of the library
+
+                // Publish the AAR file
+                artifact bundleReleaseAar // Assuming you're publishing the AAR
+
+                // Include dependencies in the POM
+                pom.withXml {
+                    asNode().appendNode('dependencies').with {
+                        appendNode('dependency').with {
+                            appendNode('groupId', 'com.ziylanmedya.zmckit')
+                            appendNode('artifactId', 'support-camera-activity')
+                            appendNode('version', '1.34.0')
+                        }
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                url = uri("${rootDir}/local-maven-repo") // Local directory for Maven repo
+            }
+        }
+    }
+}
+
