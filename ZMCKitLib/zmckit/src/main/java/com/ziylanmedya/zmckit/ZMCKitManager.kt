@@ -2,14 +2,14 @@ package com.ziylanmedya.zmckit
 
 import android.content.Intent
 import android.util.Log
-import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import com.ziylanmedya.zmckit.camera.Constants.EXTRA_APPLY_LENS_ID
+import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_FACING_FRONT
+import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_KIT_API_TOKEN
+import com.ziylanmedya.zmckit.camera.Constants.EXTRA_LENS_GROUP_IDS
 import com.ziylanmedya.zmckit.camera.ZMCameraActivity
 
 class ZMCKitManager private constructor(private val activity: AppCompatActivity) {
-
-    // Activity result launcher for handling camera activity result
-    private lateinit var captureLauncher: ActivityResultLauncher<ZMCameraActivity.Configuration>
 
     // This is a callback that will be triggered on lens selection change
     private var lensChangeListener: ((String) -> Unit)? = null
@@ -44,133 +44,55 @@ class ZMCKitManager private constructor(private val activity: AppCompatActivity)
         }
     }
 
-
-//    companion object {
-//        private var lensChangeListener: ((String) -> Unit)? = null
-//
-//        /**
-//         * Registers a listener to handle lens changes.
-//         * @param listener Callback function to be invoked with the selected lens ID.
-//         */
-//        fun onLensChange(listener: (String) -> Unit) {
-//            lensChangeListener = listener
-//        }
-//
-//        /**
-//         * Notifies the registered listener about the selected lens ID.
-//         * @param lensId The ID of the selected lens.
-//         */
-//        internal fun notifyLensChange(lensId: String) {
-//            println(lensId)
-//            lensChangeListener?.invoke(lensId)
-//        }
-//    }
-
-    // Callback interface for result handling
-    interface CaptureCallback {
-        fun onImageCaptured(uri: String)
-        fun onVideoCaptured(uri: String)
-        fun onCaptureCancelled()
-        fun onCaptureFailure(exception: Exception)
-    }
-
-    // Initialize the capture launcher
-    fun initCaptureLauncher(callback: CaptureCallback) {
-        captureLauncher = activity.registerForActivityResult(ZMCameraActivity.Capture) { result ->
-            when (result) {
-                is ZMCameraActivity.Capture.Result.Success.Video -> {
-                    callback.onVideoCaptured(result.uri.toString())
-                }
-
-                is ZMCameraActivity.Capture.Result.Success.Image -> {
-                    callback.onImageCaptured(result.uri.toString())
-                }
-
-                is ZMCameraActivity.Capture.Result.Cancelled -> {
-                    callback.onCaptureCancelled()
-                }
-
-                is ZMCameraActivity.Capture.Result.Failure -> {
-                    callback.onCaptureFailure(result.exception)
-                }
-            }
-        }
-    }
-
     /**
-     * Launches the camera in single product mode to display single lens.
+     * Launches the camera in single product mode to display single lens as Activity.
      *
      * @param snapAPIToken The API token for authentication with Snap Camera Kit.
      * @param partnerGroupId The unique ID for the partner lens group.
      * @param lensId The unique ID for the lens.
      * @param cameraFacingFront Whether the camera should default to front-facing.
-     * @param cameraFacingFlipEnabled Whether the camera flip functionality should be enabled.
      */
-    fun showProductView(
+    fun showProductActivity(
         snapAPIToken: String,
         partnerGroupId: String,
         lensId: String,
-        cameraFacingFront : Boolean = false,
-        cameraFacingFlipEnabled: Boolean = false)
+        cameraFacingFront : Boolean = false)
     {
-        // Create the camera configuration for a single product view
-        val lensGroup = arrayOf(partnerGroupId) // Use the lensId for a single product
+        // Create the camera for a lens
+        val lensGroup = arrayOf(partnerGroupId).toSet().toTypedArray()
 
-        val configuration = ZMCameraActivity.Configuration.WithLens(
-            cameraKitApiToken = snapAPIToken,  // Using the passed API token
-            lensGroupId = lensGroup.first(),  // Set of lens IDs for single or multiple lenses
-            lensId = lensId,
-            displayLensIcon = false,
-            cameraAdjustmentsConfiguration = ZMCameraActivity.AdjustmentsConfiguration(
-                toneAdjustmentEnabled = false,
-                portraitAdjustmentEnabled = false
-            ),
-            cameraFacingFront = cameraFacingFront,
-            cameraFacingFlipEnabled = cameraFacingFlipEnabled,
-            cameraFacingBasedOnLens = false,
-            cameraFlashEnabled = false
-        )
+        // Start CameraActivity
+        val cameraIntent = Intent(activity, ZMCameraActivity::class.java).apply {
+            putExtra(EXTRA_CAMERA_KIT_API_TOKEN, snapAPIToken)
+            putExtra(EXTRA_CAMERA_FACING_FRONT, cameraFacingFront)
+            putExtra(EXTRA_LENS_GROUP_IDS, lensGroup)
+            putExtra(EXTRA_APPLY_LENS_ID, lensId)
 
-        captureLauncher.launch(configuration)
-
-        // Start CameraActivity to trigger it directly
-        val cameraIntent = Intent(activity, ZMCameraActivity::class.java)
+        }
         activity.startActivity(cameraIntent)
     }
 
     /**
-     * Launches the camera in group mode to display a lens group view.
+     * Launches the camera in group mode to display a lens group view as Activity.
      *
      * @param snapAPIToken The API token for authentication with Snap Camera Kit.
      * @param partnerGroupId The unique ID for the partner lens group.
      * @param cameraFacingFront Whether the camera should default to front-facing.
-     * @param cameraFacingFlipEnabled Whether the camera flip functionality should be enabled.
      */
-    fun showGroupView(
+    fun showGroupActivity(
         snapAPIToken: String,
         partnerGroupId: String,
-        cameraFacingFront : Boolean = false,
-        cameraFacingFlipEnabled: Boolean = false
+        cameraFacingFront : Boolean = false
     ) {
-        val lensGroup = arrayOf(partnerGroupId) // Use the lensId for a single product
-        // Use lensGroupIds for a group view (multiple lenses)
-        val configuration = ZMCameraActivity.Configuration.WithLenses(
-            cameraKitApiToken = snapAPIToken,  // Using the passed API token
-            lensGroupIds = lensGroup.toSet(),  // Set of lens IDs for single or multiple lenses
-            cameraAdjustmentsConfiguration = ZMCameraActivity.AdjustmentsConfiguration(
-                toneAdjustmentEnabled = false,
-                portraitAdjustmentEnabled = false
-            ),
-            cameraFacingFront = cameraFacingFront,
-            cameraFacingFlipEnabled = cameraFacingFlipEnabled,
-            cameraFacingBasedOnLens = false,
-            cameraFlashEnabled = false
-        )
+        // Create the camera for a multiple lenses view
+        val lensGroup = arrayOf(partnerGroupId).toSet().toTypedArray()
 
-        captureLauncher.launch(configuration)
-
-        // Start CameraActivity to trigger it directly
-        val cameraIntent = Intent(activity, ZMCameraActivity::class.java)
+        // Start CameraActivity
+        val cameraIntent = Intent(activity, ZMCameraActivity::class.java).apply {
+            putExtra(EXTRA_CAMERA_KIT_API_TOKEN, snapAPIToken)
+            putExtra(EXTRA_CAMERA_FACING_FRONT, cameraFacingFront)
+            putExtra(EXTRA_LENS_GROUP_IDS, lensGroup)
+        }
         activity.startActivity(cameraIntent)
     }
 }

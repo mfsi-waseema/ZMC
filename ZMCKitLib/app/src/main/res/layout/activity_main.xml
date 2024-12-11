@@ -6,30 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- ImageView to Display Captured Image -->
-    <ImageView
-        android:id="@+id/capturedImageView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/showProductButton"
-        android:contentDescription="Captured Image"
-        android:visibility="gone" />
-
-    <!-- VideoView to Display Captured Video -->
-    <VideoView
-        android:id="@+id/capturedVideoView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/showProductButton"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
     <Button
         android:id="@+id/showProductButton"
         android:layout_width="wrap_content"

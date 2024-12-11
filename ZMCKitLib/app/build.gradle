@@ -51,10 +51,10 @@ dependencies {
     implementation libs.material
 
     // Add local library as prject
-//    implementation project(':zmckit')
+    implementation project(':zmckit')
 
     // Add your local library dependency
-    implementation 'com.ziylanmedya:zmckit:1.0.1'
+//    implementation 'com.ziylanmedya:zmckit:1.0.1'
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
