@@ -20,6 +20,7 @@ import com.ziylanmedya.zmckit.camera.Constants.EXTRA_APPLY_LENS_ID
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_FACING_FRONT
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_KIT_API_TOKEN
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_EXCEPTION
+import com.ziylanmedya.zmckit.camera.Constants.EXTRA_LENS_CHANGE_LISTENER
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_LENS_GROUP_IDS
 import com.ziylanmedya.zmckit.camera.Constants.RESULT_CODE_FAILURE
 import java.io.Closeable
@@ -39,6 +40,8 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
 
         private val closeOnDestroy = mutableListOf<Closeable>()
 
+        private var lensChangeListener:ZMCKitManager.LensChangeListener? = null
+
         override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
 
@@ -46,10 +49,11 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                 val cameraFacingFront = intent.getBooleanExtra(EXTRA_CAMERA_FACING_FRONT, false)
                 val lensGroupIds = intent.getStringArrayExtra(EXTRA_LENS_GROUP_IDS)?.toSet() ?: emptySet()
                 val applyLensById = intent.getStringExtra(EXTRA_APPLY_LENS_ID)
+                lensChangeListener = intent.getSerializableExtra(EXTRA_LENS_CHANGE_LISTENER) as? ZMCKitManager.LensChangeListener
 
                 setContentView(R.layout.camera_kit_activity_camerakit_camera)
 
-                cameraLayout = findViewById<CameraLayout>(R.id.camera_layout).apply {
+                cameraLayout = findViewById<CameraLayout>(R.id.snap_camera_layout).apply {
                         configureSession {
                                 apiToken(apiToken)
                         }
@@ -124,7 +128,7 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                                                                 val selectedLensId = event.lens.id
                                                                 val activity = (cameraLayout.context as? AppCompatActivity)
                                                                 activity?.runOnUiThread {
-                                                                        ZMCKitManager.getInstance(activity).notifyLensChange(selectedLensId)
+                                                                        lensChangeListener?.onLensChange(selectedLensId)
                                                                 }
                                                         }
                                                         else -> {

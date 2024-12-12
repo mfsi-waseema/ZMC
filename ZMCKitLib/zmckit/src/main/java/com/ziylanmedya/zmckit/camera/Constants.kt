@@ -6,6 +6,7 @@ internal object Constants {
 
     const val EXTRA_LENS_GROUP_IDS = "lens_group_ids"
     const val EXTRA_APPLY_LENS_ID = "apply_lens_id"
+    const val EXTRA_LENS_CHANGE_LISTENER = "EXTRA_LENS_CHANGE_LISTENER"
     const val EXTRA_EXCEPTION = "failure"
 
     const val RESULT_CODE_FAILURE = 100

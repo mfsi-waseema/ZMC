@@ -1,5 +1,6 @@
 package com.ziylanmedya.camera
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -10,13 +11,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Access the ZMCKitManager singleton and pass the current activity to it
-        val zmckitManager = ZMCKitManager.getInstance(this)
-        // Register the listener to handle lens changes
-        zmckitManager.onLensChange { lensId ->
-            // Handle the lens change here
-            println("Lens changed: $lensId")
+        val customCameraButton: Button = findViewById(R.id.customCameraButton)
+        customCameraButton.setOnClickListener {
+            val intent = Intent(this, CustomCameraActivity::class.java)
+            startActivity(intent)
         }
+
+        setupZMCCamera()
+    }
+
+    private fun setupZMCCamera() {
 
         // Find the button by its ID
         val showProductButton: Button = findViewById(R.id.showProductButton)
@@ -28,10 +32,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             val partnerGroupId = BuildConfig.LENS_GROUP_ID
             val lensId = BuildConfig.LENS_ID
 
-            zmckitManager.showProductActivity(
+            ZMCKitManager.showProductActivity(
+                this,
                 snapAPIToken,
                 partnerGroupId,
-                lensId
+                lensId,
+                onLensChange = object : ZMCKitManager.LensChangeListener {
+                    override fun onLensChange(lensId: String) {
+                        println("Lens changed: $lensId")
+                    }
+                }
             )
         }
 
@@ -40,9 +50,15 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             val snapAPIToken = BuildConfig.CAMERA_KIT_API_TOKEN
             val partnerGroupId = BuildConfig.LENS_GROUP_ID
 
-            zmckitManager.showGroupActivity(
+            ZMCKitManager.showGroupActivity(
+                this,
                 snapAPIToken,
-                partnerGroupId
+                partnerGroupId,
+                onLensChange = object : ZMCKitManager.LensChangeListener {
+                    override fun onLensChange(lensId: String) {
+                        println("Lens changed: $lensId")
+                    }
+                }
             )
         }
     }

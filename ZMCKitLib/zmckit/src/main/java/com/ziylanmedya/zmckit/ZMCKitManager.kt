@@ -1,98 +1,119 @@
 package com.ziylanmedya.zmckit
 
+import android.content.Context
 import android.content.Intent
-import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_APPLY_LENS_ID
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_FACING_FRONT
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_KIT_API_TOKEN
+import com.ziylanmedya.zmckit.camera.Constants.EXTRA_LENS_CHANGE_LISTENER
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_LENS_GROUP_IDS
 import com.ziylanmedya.zmckit.camera.ZMCameraActivity
+import com.ziylanmedya.zmckit.widgets.ZMCCameraLayout
 
-class ZMCKitManager private constructor(private val activity: AppCompatActivity) {
+class ZMCKitManager private constructor() {
 
-    // This is a callback that will be triggered on lens selection change
-    private var lensChangeListener: ((String) -> Unit)? = null
-
-    /**
-     * Registers a listener to handle lens changes.
-     * @param listener Callback function to be invoked with the selected lens ID.
-     */
-    fun onLensChange(listener: (String) -> Unit) {
-        lensChangeListener = listener
+    // Notify listeners when lens changes
+    interface LensChangeListener : java.io.Serializable {
+        fun onLensChange(lensId: String)
     }
 
-    // Private method to notify listeners
-    internal fun notifyLensChange(lensId: String) {
-        if (lensChangeListener == null) {
-            Log.w("ZMCKitManager", "Lens change listener is not registered!")
-        }
-
-        lensChangeListener?.invoke(lensId)
-    }
-
+    // ---- Full-Screen Activity Methods ----
     companion object {
-        // Singleton instance to hold the only instance of ZMCKitManager
-        @Volatile
-        private var INSTANCE: ZMCKitManager? = null
-
-        // This function ensures only one instance of ZMCKitManager is created
-        fun getInstance(activity: AppCompatActivity): ZMCKitManager {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: ZMCKitManager(activity).also { INSTANCE = it }
+        /**
+         * Launches the camera in single product mode as a full-screen activity.
+         */
+        fun showProductActivity(
+            context: Context,
+            snapAPIToken: String,
+            partnerGroupId: String,
+            lensId: String,
+            onLensChange: LensChangeListener,
+            cameraFacingFront: Boolean = false
+        ) {
+            val intent = Intent(context, ZMCameraActivity::class.java).apply {
+                putExtra(EXTRA_CAMERA_KIT_API_TOKEN, snapAPIToken)
+                putExtra(EXTRA_CAMERA_FACING_FRONT, cameraFacingFront)
+                putExtra(EXTRA_LENS_GROUP_IDS, arrayOf(partnerGroupId))
+                putExtra(EXTRA_APPLY_LENS_ID, lensId)
+                putExtra(EXTRA_LENS_CHANGE_LISTENER, onLensChange)
             }
+            context.startActivity(intent)
         }
-    }
 
-    /**
-     * Launches the camera in single product mode to display single lens as Activity.
-     *
-     * @param snapAPIToken The API token for authentication with Snap Camera Kit.
-     * @param partnerGroupId The unique ID for the partner lens group.
-     * @param lensId The unique ID for the lens.
-     * @param cameraFacingFront Whether the camera should default to front-facing.
-     */
-    fun showProductActivity(
-        snapAPIToken: String,
-        partnerGroupId: String,
-        lensId: String,
-        cameraFacingFront : Boolean = false)
-    {
-        // Create the camera for a lens
-        val lensGroup = arrayOf(partnerGroupId).toSet().toTypedArray()
-
-        // Start CameraActivity
-        val cameraIntent = Intent(activity, ZMCameraActivity::class.java).apply {
-            putExtra(EXTRA_CAMERA_KIT_API_TOKEN, snapAPIToken)
-            putExtra(EXTRA_CAMERA_FACING_FRONT, cameraFacingFront)
-            putExtra(EXTRA_LENS_GROUP_IDS, lensGroup)
-            putExtra(EXTRA_APPLY_LENS_ID, lensId)
-
+        /**
+         * Launches the camera in group mode as a full-screen activity.
+         */
+        fun showGroupActivity(
+            context: Context,
+            snapAPIToken: String,
+            partnerGroupId: String,
+            onLensChange: LensChangeListener?,
+            cameraFacingFront: Boolean = false
+        ) {
+            val intent = Intent(context, ZMCameraActivity::class.java).apply {
+                putExtra(EXTRA_CAMERA_KIT_API_TOKEN, snapAPIToken)
+                putExtra(EXTRA_CAMERA_FACING_FRONT, cameraFacingFront)
+                putExtra(EXTRA_LENS_GROUP_IDS, arrayOf(partnerGroupId))
+                putExtra(EXTRA_LENS_CHANGE_LISTENER, onLensChange)
+            }
+            context.startActivity(intent)
         }
-        activity.startActivity(cameraIntent)
-    }
 
-    /**
-     * Launches the camera in group mode to display a lens group view as Activity.
-     *
-     * @param snapAPIToken The API token for authentication with Snap Camera Kit.
-     * @param partnerGroupId The unique ID for the partner lens group.
-     * @param cameraFacingFront Whether the camera should default to front-facing.
-     */
-    fun showGroupActivity(
-        snapAPIToken: String,
-        partnerGroupId: String,
-        cameraFacingFront : Boolean = false
-    ) {
-        // Create the camera for a multiple lenses view
-        val lensGroup = arrayOf(partnerGroupId).toSet().toTypedArray()
-
-        // Start CameraActivity
-        val cameraIntent = Intent(activity, ZMCameraActivity::class.java).apply {
-            putExtra(EXTRA_CAMERA_KIT_API_TOKEN, snapAPIToken)
-            putExtra(EXTRA_CAMERA_FACING_FRONT, cameraFacingFront)
-            putExtra(EXTRA_LENS_GROUP_IDS, lensGroup)
+        /**
+         * Initializes and configures a ZMCCameraLayout for single product view.
+         *
+         * @param context the context to be used for creating the ZMCCameraLayout.
+         * @param snapAPIToken the Snap API token for configuration.
+         * @param partnerGroupId the group ID for the partner.
+         * @param lensId the lens ID to be applied.
+         * @param listener the lens change listener to be triggered when lens changes.
+         * @return the configured ZMCCameraLayout.
+         */
+        fun createProductCameraLayout(
+            context: Context,
+            snapAPIToken: String,
+            partnerGroupId: String,
+            lensId: String,
+            listener: LensChangeListener
+        ): ZMCCameraLayout {
+            // Initialize the ZMCCameraLayout programmatically
+            val zmcCameraLayout = ZMCCameraLayout(context).apply {
+                // Configure it for Single Product
+                configureProductViewLayout(
+                    snapAPIToken,
+                    partnerGroupId,
+                    lensId,
+                    listener = listener
+                )
+            }
+            return zmcCameraLayout
         }
-        activity.startActivity(cameraIntent)
+
+        /**
+         * Initializes and configures a ZMCCameraLayout for group view.
+         *
+         * @param context the context to be used for creating the ZMCCameraLayout.
+         * @param snapAPIToken the Snap API token for configuration.
+         * @param partnerGroupId the group ID for the partner.
+         * @param listener the lens change listener to be triggered when lens changes.
+         * @return the configured ZMCCameraLayout.
+         */
+        fun createGroupCameraLayout(
+            context: Context,
+            snapAPIToken: String,
+            partnerGroupId: String,
+            listener: LensChangeListener
+        ): ZMCCameraLayout {
+            // Initialize the ZMCCameraLayout programmatically
+            val zmcCameraLayout = ZMCCameraLayout(context).apply {
+                // Configure it for Group View
+                configureGroupViewLayout(
+                    snapAPIToken,
+                    partnerGroupId,
+                    listener = listener
+                )
+            }
+            return zmcCameraLayout
+        }
     }
 }
