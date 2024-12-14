@@ -1,17 +1,18 @@
 package com.ziylanmedya.camera
 
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.ziylanmedya.zmckit.ZMCKitManager
-import com.ziylanmedya.zmckit.widgets.ZMCCameraLayout
+import com.ziylanmedya.zmckit.widgets.ZMCameraLayout
 
 class CustomCameraActivity : AppCompatActivity() {
 
     private lateinit var cameraContainer: FrameLayout  // Parent container
 
-    private var zmcCameraLayout: ZMCCameraLayout? = null
+    private var zmcCameraLayout: ZMCameraLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,10 +45,14 @@ class CustomCameraActivity : AppCompatActivity() {
                 snapAPIToken = snapAPIToken,
                 partnerGroupId = partnerGroupId,
                 lensId = lensId,
-                listener = object : ZMCKitManager.LensChangeListener {
+                cameraListener = object : ZMCKitManager.ZMCameraListener {
                     override fun onLensChange(lensId: String) {
                         // Handle the lens change here
                         println("Lens changed: $lensId")
+                    }
+
+                    override fun onImageCaptured(imageUri: Uri) {
+                        println("Capture Image: $imageUri")
                     }
                 }
             )
@@ -64,10 +69,14 @@ class CustomCameraActivity : AppCompatActivity() {
                 context = this,
                 snapAPIToken = snapAPIToken,
                 partnerGroupId = partnerGroupId,
-                listener = object : ZMCKitManager.LensChangeListener {
+                cameraListener = object : ZMCKitManager.ZMCameraListener {
                     override fun onLensChange(lensId: String) {
                         // Handle the lens change here
                         println("Lens changed: $lensId")
+                    }
+
+                    override fun onImageCaptured(imageUri: Uri) {
+
                     }
                 }
             )

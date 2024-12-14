@@ -1,6 +1,7 @@
 package com.ziylanmedya.camera
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -37,9 +38,14 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 snapAPIToken,
                 partnerGroupId,
                 lensId,
-                onLensChange = object : ZMCKitManager.LensChangeListener {
+                cameraListener = object : ZMCKitManager.ZMCameraListener {
                     override fun onLensChange(lensId: String) {
+                        // Handle the lens change here
                         println("Lens changed: $lensId")
+                    }
+
+                    override fun onImageCaptured(imageUri: Uri) {
+                        println("Capture Image: $imageUri")
                     }
                 }
             )
@@ -54,9 +60,14 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 this,
                 snapAPIToken,
                 partnerGroupId,
-                onLensChange = object : ZMCKitManager.LensChangeListener {
+                cameraListener = object : ZMCKitManager.ZMCameraListener {
                     override fun onLensChange(lensId: String) {
+                        // Handle the lens change here
                         println("Lens changed: $lensId")
+                    }
+
+                    override fun onImageCaptured(imageUri: Uri) {
+
                     }
                 }
             )

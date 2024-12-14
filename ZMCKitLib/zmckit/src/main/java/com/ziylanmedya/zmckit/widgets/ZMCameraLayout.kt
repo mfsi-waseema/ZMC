@@ -1,6 +1,7 @@
 package com.ziylanmedya.zmckit.widgets
 
 import android.content.Context
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.View
@@ -12,10 +13,11 @@ import com.snap.camerakit.lenses.whenHasSome
 import com.snap.camerakit.support.widget.CameraLayout
 import com.ziylanmedya.zmckit.R
 import com.ziylanmedya.zmckit.ZMCKitManager
+import com.ziylanmedya.zmckit.camera.cacheJpegOf
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 
-class ZMCCameraLayout @JvmOverloads constructor(
+class ZMCameraLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -32,7 +34,7 @@ class ZMCCameraLayout @JvmOverloads constructor(
         cameraFacingFront: Boolean = false,
         lensGroupIds: Set<String>,
         applyLensById: String?,
-        listener: ZMCKitManager.LensChangeListener?
+        cameraListener: ZMCKitManager.ZMCameraListener?
     ) {
         inflate(context, R.layout.camera_kit_activity_camerakit_camera, this)
 
@@ -53,7 +55,7 @@ class ZMCCameraLayout @JvmOverloads constructor(
             }
 
             toggleFlashButton.visibility = View.GONE
-            captureButton.visibility = View.GONE
+            captureButton.visibility = View.VISIBLE
             tapToFocusView.visibility = View.GONE
             flipFacingButton.visibility = View.GONE
 
@@ -61,7 +63,21 @@ class ZMCCameraLayout @JvmOverloads constructor(
 
             onSessionAvailable { session ->
                 cameraSession = session
-                handleSessionAvailable(session, lensGroupIds, applyLensById, cameraFacingFront, listener)
+                handleSessionAvailable(session, lensGroupIds, applyLensById, cameraFacingFront, cameraListener)
+            }
+
+            onImageTaken { bitmap ->
+                toggleFlashButton.visibility = View.GONE
+
+                try {
+                    val imageFile = context.cacheJpegOf(bitmap)
+                    cameraListener?.onImageCaptured(Uri.fromFile(imageFile))
+                    if (cameraListener?.shouldShowDefaultPreview() == true) {
+                        ZMCKitManager.showPreview(context, imageFile.absolutePath)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
 
             onError { error ->
@@ -76,7 +92,7 @@ class ZMCCameraLayout @JvmOverloads constructor(
         lensGroupIds: Set<String>,
         applyLensById: String?,
         cameraFacingFront: Boolean,
-        listener: ZMCKitManager.LensChangeListener?
+        listener: ZMCKitManager.ZMCameraListener?
     ) {
         val appliedLensById = AtomicBoolean()
         closeOnDestroy.add(
@@ -135,14 +151,14 @@ class ZMCCameraLayout @JvmOverloads constructor(
         partnerGroupId: String,
         lensId: String,
         cameraFacingFront: Boolean = false,
-        listener: ZMCKitManager.LensChangeListener?
+        cameraListener: ZMCKitManager.ZMCameraListener?
     ) {
         initialize(
             apiToken = snapAPIToken,
             cameraFacingFront = cameraFacingFront,
             lensGroupIds = setOf(partnerGroupId),
             applyLensById = lensId,
-            listener = listener
+            cameraListener = cameraListener
         )
     }
 
@@ -151,14 +167,14 @@ class ZMCCameraLayout @JvmOverloads constructor(
         snapAPIToken: String,
         partnerGroupId: String,
         cameraFacingFront: Boolean = false,
-        listener: ZMCKitManager.LensChangeListener?
+        cameraListener: ZMCKitManager.ZMCameraListener?
     ) {
         initialize(
             apiToken = snapAPIToken,
             cameraFacingFront = cameraFacingFront,
             lensGroupIds = setOf(partnerGroupId),
             applyLensById = null,
-            listener = listener
+            cameraListener = cameraListener
         )
     }
 

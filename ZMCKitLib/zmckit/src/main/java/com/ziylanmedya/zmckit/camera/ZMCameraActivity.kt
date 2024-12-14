@@ -20,7 +20,7 @@ import com.ziylanmedya.zmckit.camera.Constants.EXTRA_APPLY_LENS_ID
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_FACING_FRONT
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_KIT_API_TOKEN
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_EXCEPTION
-import com.ziylanmedya.zmckit.camera.Constants.EXTRA_LENS_CHANGE_LISTENER
+import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_LISTENER
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_LENS_GROUP_IDS
 import com.ziylanmedya.zmckit.camera.Constants.RESULT_CODE_FAILURE
 import java.io.Closeable
@@ -40,7 +40,7 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
 
         private val closeOnDestroy = mutableListOf<Closeable>()
 
-        private var lensChangeListener:ZMCKitManager.LensChangeListener? = null
+        private var cameraListener:ZMCKitManager.ZMCameraListener? = null
 
         override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
@@ -49,7 +49,7 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                 val cameraFacingFront = intent.getBooleanExtra(EXTRA_CAMERA_FACING_FRONT, false)
                 val lensGroupIds = intent.getStringArrayExtra(EXTRA_LENS_GROUP_IDS)?.toSet() ?: emptySet()
                 val applyLensById = intent.getStringExtra(EXTRA_APPLY_LENS_ID)
-                lensChangeListener = intent.getSerializableExtra(EXTRA_LENS_CHANGE_LISTENER) as? ZMCKitManager.LensChangeListener
+                cameraListener = intent.getSerializableExtra(EXTRA_CAMERA_LISTENER) as? ZMCKitManager.ZMCameraListener
 
                 setContentView(R.layout.camera_kit_activity_camerakit_camera)
 
@@ -75,7 +75,7 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                                 }
                         }
 
-                        captureButton.visibility = View.GONE
+                        captureButton.visibility = View.VISIBLE
                         toggleFlashButton.visibility = View.GONE
                         flipFacingButton.visibility = View.GONE
                         tapToFocusView.visibility = View.GONE
@@ -83,20 +83,16 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                         enabledAdjustments = emptySet()
 
                         onImageTaken { bitmap ->
-                                val imageFile = this@ZMCameraActivity.cacheJpegOf(bitmap)
-                                val intent = Intent().apply {
-                                        setDataAndType(Uri.fromFile(imageFile), "image/jpeg")
+                                try {
+                                        val imageFile = this@ZMCameraActivity.cacheJpegOf(bitmap)
+                                        cameraListener?.onImageCaptured(Uri.fromFile(imageFile))
+                                        if (cameraListener?.shouldShowDefaultPreview() == true) {
+                                                ZMCKitManager.showPreview(context, imageFile.absolutePath)
+                                        }
+                                } catch (_: Exception) {
+                                } finally {
+                                        finish()
                                 }
-                                setResult(Activity.RESULT_OK, intent)
-                                finish()
-                        }
-
-                        onVideoTaken { file ->
-                                val intent = Intent().apply {
-                                        setDataAndType(Uri.fromFile(file), "video/mp4")
-                                }
-                                setResult(Activity.RESULT_OK, intent)
-                                finish()
                         }
 
                         onSessionAvailable { session ->
@@ -128,7 +124,7 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                                                                 val selectedLensId = event.lens.id
                                                                 val activity = (cameraLayout.context as? AppCompatActivity)
                                                                 activity?.runOnUiThread {
-                                                                        lensChangeListener?.onLensChange(selectedLensId)
+                                                                        cameraListener?.onLensChange(selectedLensId)
                                                                 }
                                                         }
                                                         else -> {
@@ -244,4 +240,5 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                         override val cause: Throwable?
                 ) : Exception(message, cause)
         }
+
 }
