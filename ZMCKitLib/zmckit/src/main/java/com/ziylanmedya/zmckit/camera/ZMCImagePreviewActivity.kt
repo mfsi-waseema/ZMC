@@ -46,12 +46,16 @@ class ImagePreviewActivity : AppCompatActivity() {
         }
     }
 
+    private fun getDefaultProviderAuthority(): String {
+        return "${this.packageName}.provider"
+    }
+
     private fun shareImage(imageUri: Uri) {
         imageUri.path?.let { imagePath ->
             // Get the content URI using FileProvider
             val contentUri: Uri = FileProvider.getUriForFile(
                 this,
-                "com.ziylanmedya.camera.provider",
+                getDefaultProviderAuthority(),
                 File(imagePath)
             )
 

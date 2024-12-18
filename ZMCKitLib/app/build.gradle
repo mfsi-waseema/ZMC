@@ -50,7 +50,7 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.material
 
-    // Add local library as prject
+    // Add local library as project
 //    implementation project(':zmckit')
 
     // Add your local library dependency

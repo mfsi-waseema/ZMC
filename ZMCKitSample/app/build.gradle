@@ -16,7 +16,7 @@ android {
         minSdk 21
         targetSdk 34
         versionCode 1
-        versionName "1.0.1"
+        versionName "1.0.2"
 
         multiDexEnabled true
 
@@ -51,7 +51,7 @@ dependencies {
     implementation libs.material
 
     // Add library dependency
-    implementation 'com.ziylanmedya:zmckit:1.0.1'
+    implementation 'com.ziylanmedya:zmckit:1.0.2'
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
