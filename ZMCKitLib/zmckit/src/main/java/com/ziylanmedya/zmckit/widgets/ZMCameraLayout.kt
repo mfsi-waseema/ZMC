@@ -10,10 +10,8 @@ import com.snap.camerakit.ImageProcessor
 import com.snap.camerakit.UnauthorizedApplicationException
 import com.snap.camerakit.lenses.LensesComponent
 import com.snap.camerakit.lenses.whenHasSome
-import com.snap.camerakit.support.widget.CameraLayout
 import com.ziylanmedya.zmckit.R
 import com.ziylanmedya.zmckit.ZMCKitManager
-import com.ziylanmedya.zmckit.camera.cacheJpegOf
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -23,8 +21,7 @@ class ZMCameraLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-
-    private lateinit var cameraLayout: CameraLayout
+    private lateinit var ZCameraLayout: ZCameraLayout
     private var cameraSession: com.snap.camerakit.Session? = null
     private val closeOnDestroy = mutableListOf<Closeable>()
 
@@ -38,7 +35,7 @@ class ZMCameraLayout @JvmOverloads constructor(
     ) {
         inflate(context, R.layout.camera_kit_activity_camerakit_camera, this)
 
-        cameraLayout = findViewById<CameraLayout>(R.id.snap_camera_layout).apply {
+        ZCameraLayout = findViewById<ZCameraLayout>(R.id.snap_camera_layout).apply {
             configureSession { apiToken(apiToken) }
 
             configureLensesCarousel {
@@ -54,12 +51,7 @@ class ZMCameraLayout @JvmOverloads constructor(
                 }
             }
 
-            toggleFlashButton.visibility = View.GONE
             captureButton.visibility = View.VISIBLE
-            tapToFocusView.visibility = View.GONE
-            flipFacingButton.visibility = View.GONE
-
-            enabledAdjustments = emptySet()
 
             onSessionAvailable { session ->
                 cameraSession = session
@@ -67,8 +59,6 @@ class ZMCameraLayout @JvmOverloads constructor(
             }
 
             onImageTaken { bitmap ->
-                toggleFlashButton.visibility = View.GONE
-
                 try {
                     val imageFile = context.cacheJpegOf(bitmap)
                     cameraListener?.onImageCaptured(Uri.fromFile(imageFile))
@@ -126,16 +116,16 @@ class ZMCameraLayout @JvmOverloads constructor(
                 }
             }
         )
-        cameraLayout.startPreview(facingFront = cameraFacingFront)
+        ZCameraLayout.startPreview(facingFront = cameraFacingFront)
     }
 
     private fun mapErrorToException(error: Throwable): Exception {
         return when (error) {
             is UnauthorizedApplicationException ->
                 IllegalStateException("Application is not authorized to use CameraKit", error)
-            is CameraLayout.Failure.DeviceNotSupported ->
+            is ZCameraLayout.Failure.DeviceNotSupported ->
                 UnsupportedOperationException("Device not supported by CameraKit", error)
-            is CameraLayout.Failure.MissingPermissions ->
+            is ZCameraLayout.Failure.MissingPermissions ->
                 SecurityException("Permissions required for CameraKit were not granted", error)
             is ImageProcessor.Failure.Graphics ->
                 RuntimeException("Graphics processing failure in CameraKit", error)
@@ -186,7 +176,7 @@ class ZMCameraLayout @JvmOverloads constructor(
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        return if (cameraLayout.dispatchKeyEvent(event)) {
+        return if (ZCameraLayout.dispatchKeyEvent(event)) {
             true
         } else {
             super.dispatchKeyEvent(event)

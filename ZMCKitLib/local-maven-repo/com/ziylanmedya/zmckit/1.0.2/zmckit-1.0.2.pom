@@ -8,8 +8,21 @@
   <dependencies>
     <dependency>
       <groupId>com.ziylanmedya.zmckit</groupId>
-      <artifactId>support-camera-activity</artifactId>
+      <artifactId>camerakit</artifactId>
       <version>1.34.0</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.ziylanmedya.zmckit</groupId>
+      <artifactId>support-camera-layout</artifactId>
+      <version>1.34.0</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.ziylanmedya.zmckit</groupId>
+      <artifactId>support-arcore</artifactId>
+      <version>1.34.0</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 </project>

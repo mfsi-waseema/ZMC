@@ -8,11 +8,11 @@ pluginManagement {
             }
         }
         mavenCentral()
-//        maven {
+        maven {
 //        //    url "https://raw.githubusercontent.com/ziylanmedya/ZMCameraKit-Android/main/"
 //
-            //  url "${rootDir}/local-maven-repo"
-//        }  // Add this line to ensure local repo is included
+        url "${rootDir}/local-maven-repo"
+        }  // Add this line to ensure local repo is included
         gradlePluginPortal()
     }
 }

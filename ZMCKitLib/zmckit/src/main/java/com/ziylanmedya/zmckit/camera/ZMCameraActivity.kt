@@ -13,7 +13,7 @@ import com.snap.camerakit.ImageProcessor
 import com.snap.camerakit.UnauthorizedApplicationException
 import com.snap.camerakit.lenses.LensesComponent
 import com.snap.camerakit.lenses.whenHasSome
-import com.snap.camerakit.support.widget.CameraLayout
+import com.ziylanmedya.zmckit.widgets.ZCameraLayout
 import com.ziylanmedya.zmckit.R
 import com.ziylanmedya.zmckit.ZMCKitManager
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_APPLY_LENS_ID
@@ -23,6 +23,7 @@ import com.ziylanmedya.zmckit.camera.Constants.EXTRA_EXCEPTION
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_CAMERA_LISTENER
 import com.ziylanmedya.zmckit.camera.Constants.EXTRA_LENS_GROUP_IDS
 import com.ziylanmedya.zmckit.camera.Constants.RESULT_CODE_FAILURE
+import com.ziylanmedya.zmckit.widgets.cacheJpegOf
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -36,7 +37,7 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
         private val activityTag = "ZMCameraActivity"
 
         @Suppress("MemberVisibilityCanBePrivate") // left accessible for sub-classing
-        protected lateinit var cameraLayout: CameraLayout
+        protected lateinit var ZCameraLayout: ZCameraLayout
 
         private val closeOnDestroy = mutableListOf<Closeable>()
 
@@ -53,7 +54,7 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
 
                 setContentView(R.layout.camera_kit_activity_camerakit_camera)
 
-                cameraLayout = findViewById<CameraLayout>(R.id.snap_camera_layout).apply {
+                ZCameraLayout = findViewById<ZCameraLayout>(R.id.snap_camera_layout).apply {
                         configureSession {
                                 apiToken(apiToken)
                         }
@@ -76,11 +77,6 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                         }
 
                         captureButton.visibility = View.VISIBLE
-                        toggleFlashButton.visibility = View.GONE
-                        flipFacingButton.visibility = View.GONE
-                        tapToFocusView.visibility = View.GONE
-
-                        enabledAdjustments = emptySet()
 
                         onImageTaken { bitmap ->
                                 try {
@@ -122,7 +118,7 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                                                 when (event) {
                                                         is LensesComponent.Carousel.Event.Activated.WithLens -> {
                                                                 val selectedLensId = event.lens.id
-                                                                val activity = (cameraLayout.context as? AppCompatActivity)
+                                                                val activity = (ZCameraLayout.context as? AppCompatActivity)
                                                                 activity?.runOnUiThread {
                                                                         cameraListener?.onLensChange(selectedLensId)
                                                                 }
@@ -142,9 +138,9 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
                                 val exception = when (error) {
                                         is UnauthorizedApplicationException ->
                                                 Exception.Unauthorized("Application is not authorized to use CameraKit", error)
-                                        is CameraLayout.Failure.DeviceNotSupported ->
+                                        is ZCameraLayout.Failure.DeviceNotSupported ->
                                                 Exception.DeviceNotSupported("CameraKit does not support this device", error)
-                                        is CameraLayout.Failure.MissingPermissions ->
+                                        is ZCameraLayout.Failure.MissingPermissions ->
                                                 Exception.MissingPermissions("Permissions required to run CameraKit were not granted", error)
                                         is ImageProcessor.Failure.Graphics ->
                                                 Exception.GraphicsProcessing(
@@ -174,7 +170,7 @@ internal open class ZMCameraActivity : AppCompatActivity(), LifecycleOwner {
         }
 
         override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-                return if (cameraLayout.dispatchKeyEvent(event)) {
+                return if (ZCameraLayout.dispatchKeyEvent(event)) {
                         true
                 } else {
                         super.dispatchKeyEvent(event)
