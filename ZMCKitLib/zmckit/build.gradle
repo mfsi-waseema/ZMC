@@ -12,7 +12,7 @@ android {
         minSdk 21
         targetSdk 34
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,19 +42,9 @@ dependencies {
     androidTestImplementation libs.androidx.espresso.core
 
     def cameraKitVersion = '1.34.0'
-    implementation"com.ziylanmedya.zmckit:support-camera-activity:$cameraKitVersion"
-
-//    implementation ("com.ziylanmedya.zmckit:camerakit:$cameraKitVersion")
-//    implementation ("com.ziylanmedya.zmckit:support-camera-layout:$cameraKitVersion")
-
-//    implementation 'com.ziylanmedya.zmckit:camerakit:1.34.0'
-//    implementation 'com.ziylanmedya.zmckit:camerakit-api:1.34.0'
-//    implementation 'com.ziylanmedya.zmckit:camerakit-kotlin:1.34.0'
-//    implementation 'com.ziylanmedya.zmckit:support-camera-common:1.34.0'
-//    implementation 'com.ziylanmedya.zmckit:support-camerax:1.34.0'
-//    implementation 'com.ziylanmedya.zmckit:support-media-recording:1.27.0'
-//    implementation 'com.ziylanmedya.zmckit:support-permissions:1.34.0'
-//    implementation 'com.ziylanmedya.zmckit:support-snap-attribution:1.34.0'
+    implementation ("com.ziylanmedya.zmckit:camerakit:$cameraKitVersion")
+    implementation ("com.ziylanmedya.zmckit:support-camera-layout:$cameraKitVersion")
+    implementation ("com.ziylanmedya.zmckit:support-arcore:$cameraKitVersion")
 }
 
 // Task to generate the sources JAR
@@ -71,18 +61,32 @@ project.afterEvaluate {
             release(MavenPublication) {
                 groupId = "com.ziylanmedya" // Your package name
                 artifactId = "zmckit" // Library name
-                version = "1.0.2" // Version of the library
+                version = "1.0.3" // Version of the library
 
-                // Publish the AAR file
+                // Publish the AAR file (modify based on your project setup)
                 artifact bundleReleaseAar // Assuming you're publishing the AAR
 
-                // Include dependencies in the POM
+                // Include dependencies in the POM file
                 pom.withXml {
                     asNode().appendNode('dependencies').with {
+                        // Add required dependencies
                         appendNode('dependency').with {
                             appendNode('groupId', 'com.ziylanmedya.zmckit')
-                            appendNode('artifactId', 'support-camera-activity')
+                            appendNode('artifactId', 'camerakit')
                             appendNode('version', '1.34.0')
+                            appendNode('scope', 'runtime')
+                        }
+                        appendNode('dependency').with {
+                            appendNode('groupId', 'com.ziylanmedya.zmckit')
+                            appendNode('artifactId', 'support-camera-layout')
+                            appendNode('version', '1.34.0')
+                            appendNode('scope', 'runtime')
+                        }
+                        appendNode('dependency').with {
+                            appendNode('groupId', 'com.ziylanmedya.zmckit')
+                            appendNode('artifactId', 'support-arcore')
+                            appendNode('version', '1.34.0')
+                            appendNode('scope', 'runtime')
                         }
                     }
                 }
@@ -90,10 +94,12 @@ project.afterEvaluate {
         }
 
         repositories {
+            // Configure the repository to publish the artifact
             maven {
-                url = uri("${rootDir}/local-maven-repo") // Local directory for Maven repo
+                url = uri("${rootDir}/local-maven-repo") // Local Maven repository
             }
         }
     }
 }
+
 

@@ -22,7 +22,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        def cameraKitLensesId = "29476fd5-6eef-4aac-a3f0-224aff824194"
+        def cameraKitLensesId = "73916018-6dfd-42a4-892c-0affad447eb8"
         def cameraKitLensesGroupId = "5492a049-1f90-46cb-bbdb-082092ec55e9"
         def cameraKitApiToken = "eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzMxOTMxMTYxLCJzdWIiOiJiY2JjYWZiYi1jMzQzLTQwZjYtYTEzMS0zMTQyNDg5MzRmMjB-U1RBR0lOR35hZjliZGRjOC04Y2IwLTRkMzQtOTZlZS1jNWNjYWQ0NGNlMzcifQ.ZNRJ5hmUI6titUTZLEi_A9jd8tKwyDQoBqG-w0ef3AU"
         buildConfigField 'String', "LENS_ID", "\"${cameraKitLensesId}\""
@@ -51,7 +51,7 @@ dependencies {
     implementation libs.material
 
     // Add library dependency
-    implementation 'com.ziylanmedya:zmckit:1.0.2'
+    implementation 'com.ziylanmedya:zmckit:1.0.3'
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
